@@ -83,7 +83,7 @@ function setupBackgroundApp(app, myApp, dirname) {
 
   app.get('/_api/use-env-vars', function (req, res, next) {
     var foundVar = process.env.MESSAGE_STYLE === 'uppercase';
-    if (!foundVar) return res.json({ passed: false });
+    if (!foundVar) return res.json({ passed: false , reason: "env var not found"});
     var envvar = process.env.MESSAGE_STYLE;
     process.env.MESSAGE_STYLE = undefined;
     selfCaller('/json', req, res, function (lowerCase, req, res) {
@@ -103,10 +103,14 @@ function setupBackgroundApp(app, myApp, dirname) {
           next(e);
         }
         process.env.MESSAGE_STYLE = envvar;
-        if (lowerCase === 'Hello json' && upperCase === 'HELLO JSON') {
-          res.json({ passed: true });
-        } else {
-          res.json({ passed: false });
+        if(lowerCase !== 'Hello json'){
+          res.json({passed: false, reason: 'lowercase'});
+        }
+        else if(upperCase !== 'HELLO JSON'){
+          res.json({passed: false, reason: 'uppercase'});
+        }
+        else{
+          res.json({passed: true});
         }
       });
     });
